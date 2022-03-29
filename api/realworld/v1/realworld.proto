@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package realworld.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "cube-core/api/realworld/v1;v1";
+
+// The greeting service definition.
+service RealWorld {
+  rpc Login(LoginRequest) returns (LoginReply){
+    option (google.api.http) = {
+      post: "/api/users/login",
+      body: "*",
+    };
+  }
+
+  rpc Register(RegisterRequest) returns (RegisterReply){
+    option (google.api.http) = {
+      post: "/api/users/",
+      body: "*",
+    };
+  }
+}
+
+message UserReply{
+  message User{
+    string email = 1;
+    string token = 2;
+    string username = 3;
+    string bio = 4;
+    string image = 5;
+  }
+  User user = 1;
+}
+
+message ProfileReply{
+  message Profile{
+    string username = 1;
+    string bio = 2;
+    string image = 3;
+    bool following = 4;
+  }
+  Profile profile = 1;
+}
+
+message SingleArticle {
+
+  message Author {
+    string username = 1;
+    string bio = 2;
+    string image = 3;
+    bool following = 4;
+  }
+
+  message Article {
+    string slug = 1;
+    string title = 2;
+    string description = 3;
+    string body = 4;
+    repeated string tagList = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    bool favorited = 8;
+    uint32 favoritesCount = 9;
+    Author author = 10;
+  }
+
+  Article article = 1;
+}
+
+message MultipleArticlesReply {
+
+  message Author {
+    string username = 1;
+    string bio = 2;
+    string image = 3;
+    bool following = 4;
+  }
+
+  message Articles {
+    string slug = 1;
+    string title = 2;
+    string description = 3;
+    string body = 4;
+    repeated string tagList = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    bool favorited = 8;
+    uint32 favoritesCount = 9;
+    Author author = 10;
+  }
+
+  repeated Articles articles = 1;
+  uint32 articlesCount = 2;
+}
+
+message SingleComment {
+
+  message Author {
+    string username = 1;
+    string bio = 2;
+    string image = 3;
+    bool following = 4;
+  }
+
+  message Comment {
+    uint32 id = 1;
+    string createdAt = 2;
+    string updatedAt = 3;
+    string body = 4;
+    Author author = 5;
+  }
+
+  Comment comment = 1;
+}
+
+message MultipleCommentsReply {
+
+  message Author {
+    string username = 1;
+    string bio = 2;
+    string image = 3;
+    bool following = 4;
+  }
+
+  message Comments {
+    uint32 id = 1;
+    string createdAt = 2;
+    string updatedAt = 3;
+    string body = 4;
+    Author author = 5;
+  }
+
+  repeated Comments comments = 1;
+}
+
+message TagListReply {
+  repeated string tags = 1;
+}
+
+message LoginRequest{
+  message User{
+    string email = 1;
+    string password = 2;
+  }
+  User user = 1;
+}
+
+message LoginReply{
+
+}
+
+message RegisterRequest{
+  message User{
+    string username  =1;
+    string email = 2;
+    string password = 3;
+  }
+  User user = 1;
+}
+
+message RegisterReply{
+
+}
