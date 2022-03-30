@@ -2,25 +2,236 @@ syntax = "proto3";
 
 package realworld.v1;
 
+//import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
 option go_package = "cube-core/api/realworld/v1;v1";
 
 // The greeting service definition.
 service RealWorld {
-  rpc Login(LoginRequest) returns (LoginReply){
+  rpc Login(LoginRequest) returns (UserReply){
     option (google.api.http) = {
       post: "/api/users/login",
       body: "*",
     };
   }
 
-  rpc Register(RegisterRequest) returns (RegisterReply){
+  rpc Register(RegisterRequest) returns (UserReply){
     option (google.api.http) = {
-      post: "/api/users/",
+      post: "/api/users",
       body: "*",
     };
   }
+
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (UserReply){
+    option (google.api.http) = {
+      get: "/api/user",
+    };
+  }
+
+  rpc UpdateUser(UpdateUserRequest) returns (UserReply){
+    option (google.api.http) = {
+      put: "/api/user",
+      body: "*",
+    };
+  }
+
+  rpc GetProfile(GetProfileRequest) returns (ProfileReply){
+    option (google.api.http) = {
+      get: "/api/profiles/{username}",
+    };
+  }
+
+  rpc FollowUser(FollowUserRequest) returns (ProfileReply){
+    option (google.api.http) = {
+      post: "/api/profiles/{username}/follow",
+      body: "*",
+    };
+  }
+
+  rpc UnfollowUser(UnfollowUserRequest) returns (ProfileReply){
+    option (google.api.http) = {
+      delete: "/api/profiles/{username}/follow",
+    };
+  }
+
+  rpc ListArticles(ListArticlesRequest) returns (MultipleArticlesReply){
+    option (google.api.http) = {
+      get: "/api/articles",
+    };
+  }
+
+  rpc FeedArticles(FeedArticlesRequest) returns (MultipleArticlesReply){
+    option (google.api.http) = {
+      get: "/api/articles/feed",
+    };
+  }
+
+  rpc GetArticle(GetArticleRequest) returns (SingleArticleReply){
+    option (google.api.http) = {
+      get: "/api/articles/{slug}",
+    };
+  }
+
+  rpc CreateArticle(CreateArticleRequest) returns (SingleArticleReply){
+    option (google.api.http) = {
+      post: "/api/articles",
+      body: "*",
+    };
+  }
+
+  rpc UpdateArticle(UpdateArticleRequest) returns (SingleArticleReply){
+    option (google.api.http) = {
+      put: "/api/articles/{slug}",
+      body: "*",
+    };
+  }
+
+  rpc DeleteArticle(DeleteArticleRequest) returns (SingleArticleReply){
+    option (google.api.http) = {
+      delete: "/api/articles/{slug}",
+    };
+  }
+
+  rpc AddComment(AddCommentRequest) returns (SingleCommentReply){
+    option (google.api.http) = {
+      post: "/api/articles/{slug}/comments",
+      body: "*",
+    };
+  }
+
+  rpc GetComment(GetCommentRequest) returns (MultipleCommentsReply){
+    option (google.api.http) = {
+      get: "/api/articles/{slug}/comments",
+    };
+  }
+
+  rpc DeleteComment(DeleteCommentRequest) returns (SingleCommentReply){
+    option (google.api.http) = {
+      delete: "/api/articles/{slug}/comments/{id}",
+    };
+  }
+
+  rpc FavoriteArticle(FavoriteArticleRequest) returns (SingleArticleReply){
+    option (google.api.http) = {
+      post: "/api/articles/{slug}/favorite",
+      body: "*",
+    };
+  }
+
+  rpc UnfavoriteArticle(UnfavoriteArticleRequest) returns (SingleArticleReply){
+    option (google.api.http) = {
+      delete: "/api/articles/{slug}/favorite",
+    };
+  }
+
+  rpc GetTags(GetTagsRequest) returns (TagListReply){
+    option (google.api.http) = {
+      get: "/api/tags",
+    };
+  }
+}
+
+message GetTagsRequest{}
+
+message UnfavoriteArticleRequest{
+  string slug = 1;
+}
+
+message FavoriteArticleRequest{
+  string slug = 1;
+}
+
+message DeleteCommentRequest{
+  string slug = 1;
+  int64 id = 2;
+}
+
+message GetCommentRequest{
+  string slug = 1;
+}
+
+message AddCommentRequest {
+
+  message Comment {
+    string body = 1;
+  }
+
+  Comment comment = 1;
+  string slug = 2;
+}
+
+message DeleteArticleRequest{
+  string slug = 1;
+}
+
+message UpdateArticleRequest {
+
+  message Article {
+    string title = 1;
+    string description = 2;
+    string body = 3;
+    repeated string tagList = 4;
+  }
+
+  Article article = 1;
+  string slug = 2;
+}
+
+message CreateArticleRequest {
+
+  message Article {
+    string title = 1;
+    string description = 2;
+    string body = 3;
+    repeated string tagList = 4;
+  }
+
+  Article article = 1;
+}
+
+message GetArticleRequest{
+  string slug = 1;
+}
+
+message FeedArticlesRequest{
+  int64 limit = 4;
+  int64 offset = 5;
+}
+
+message ListArticlesRequest{
+  string tag = 1;
+  string author = 2;
+  string favorited = 3;
+  int64 limit = 4;
+  int64 offset = 5;
+}
+
+message UnfollowUserRequest{
+  string username = 1;
+}
+
+message FollowUserRequest{
+  string username = 1;
+}
+
+message GetProfileRequest{
+  string username = 1;
+}
+
+message GetCurrentUserRequest{}
+
+message UpdateUserRequest {
+
+  message User {
+    string email = 1;
+    string token = 2;
+    string username = 3;
+    string bio = 4;
+    string image = 5;
+  }
+
+  User user = 1;
 }
 
 message UserReply{
@@ -44,7 +255,7 @@ message ProfileReply{
   Profile profile = 1;
 }
 
-message SingleArticle {
+message SingleArticleReply {
 
   message Author {
     string username = 1;
@@ -95,7 +306,7 @@ message MultipleArticlesReply {
   uint32 articlesCount = 2;
 }
 
-message SingleComment {
+message SingleCommentReply {
 
   message Author {
     string username = 1;
@@ -147,19 +358,12 @@ message LoginRequest{
   User user = 1;
 }
 
-message LoginReply{
-
-}
 
 message RegisterRequest{
   message User{
-    string username  =1;
+    string username = 1;
     string email = 2;
     string password = 3;
   }
   User user = 1;
-}
-
-message RegisterReply{
-
 }
