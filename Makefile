@@ -43,6 +43,11 @@ generate:
 	go get github.com/google/wire/cmd/wire@latest
 	go generate ./...
 
+.PHONY: wire
+# wire
+wire:
+	go generate ./...
+
 .PHONY: all
 # generate all
 all:
