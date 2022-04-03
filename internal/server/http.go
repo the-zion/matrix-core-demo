@@ -1,19 +1,43 @@
 package server
 
 import (
+	"context"
 	v1 "cube-core/api/realworld/v1"
 	"cube-core/internal/conf"
+	"cube-core/internal/pkg/middleware/auth"
 	"cube-core/internal/service"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/gorilla/handlers"
 )
 
+func NewSkipRoutersMatcher() selector.MatchFunc {
+	skipRouters := make(map[string]struct{})
+	skipRouters["/realworld.v1.RealWorld/Login"] = struct{}{}
+	skipRouters["/realworld.v1.RealWorld/Register"] = struct{}{}
+	return func(ctx context.Context, operation string) bool {
+		if _, ok := skipRouters[operation]; ok {
+			return false
+		}
+		return true
+	}
+}
+
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.RealWorldService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, jwtc *conf.JWT, greeter *service.RealWorldService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
+		http.ErrorEncoder(errorEncoder),
 		http.Middleware(
 			recovery.Recovery(),
+			selector.Server(auth.JWTAuth(jwtc.Token)).Match(NewSkipRoutersMatcher()).Build(),
+		),
+		http.Filter(
+			handlers.CORS(
+				handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+				handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+				handlers.AllowedOrigins([]string{"*"})), // 生产环境，线上用的哪个域名就写哪个域名
 		),
 	}
 	if c.Http.Network != "" {
