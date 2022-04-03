@@ -3,8 +3,11 @@ module cube-core
 go 1.18
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/go-kratos/kratos/v2 v2.2.1
+	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/google/wire v0.5.0
+	github.com/gorilla/handlers v1.5.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	google.golang.org/genproto v0.0.0-20220222213610-43724f9ea8cf
@@ -15,7 +18,7 @@ require (
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-logr/logr v1.2.1 // indirect
 	github.com/go-logr/stdr v1.2.0 // indirect
