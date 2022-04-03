@@ -2,6 +2,8 @@ package biz
 
 import (
 	"context"
+	"cube-core/internal/conf"
+	"cube-core/internal/pkg/middleware/auth"
 	"errors"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
@@ -50,13 +52,18 @@ type ProfileRepo interface {
 }
 
 type UserUseCase struct {
-	ur  UserRepo
-	pr  ProfileRepo
-	log *log.Helper
+	ur   UserRepo
+	pr   ProfileRepo
+	jwtc *conf.JWT
+	log  *log.Helper
 }
 
-func NewUserUseCase(ur UserRepo, pr ProfileRepo, logger log.Logger) *UserUseCase {
-	return &UserUseCase{ur: ur, pr: pr, log: log.NewHelper(logger)}
+func NewUserUseCase(ur UserRepo, pr ProfileRepo, logger log.Logger, jwtc *conf.JWT) *UserUseCase {
+	return &UserUseCase{ur: ur, pr: pr, jwtc: jwtc, log: log.NewHelper(logger)}
+}
+
+func (uc *UserUseCase) generateToken(username string) string {
+	return auth.GenerateToken(uc.jwtc.Token, username)
 }
 
 func (uc *UserUseCase) Register(ctx context.Context, username, email, password string) (*UserLogin, error) {
@@ -71,7 +78,7 @@ func (uc *UserUseCase) Register(ctx context.Context, username, email, password s
 	return &UserLogin{
 		Email:    email,
 		Username: username,
-		Token:    "xxxx",
+		Token:    uc.generateToken(username),
 	}, nil
 }
 
@@ -88,6 +95,6 @@ func (uc *UserUseCase) Login(ctx context.Context, email, password string) (*User
 		Username: u.Username,
 		Bio:      u.Bio,
 		Image:    u.Image,
-		Token:    "xxxx",
+		Token:    uc.generateToken(u.Username),
 	}, nil
 }
