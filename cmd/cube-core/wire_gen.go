@@ -16,10 +16,14 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
+import (
+	_ "github.com/gorilla/handlers"
+)
+
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, jwt *conf.JWT, logger log.Logger) (*kratos.App, func(), error) {
 	db := data.NewDB(confData)
 	dataData, cleanup, err := data.NewData(confData, logger, db)
 	if err != nil {
@@ -27,9 +31,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	}
 	userRepo := data.NewUserRepo(dataData, logger)
 	profileRepo := data.NewProfileRepo(dataData, logger)
-	userUseCase := biz.NewUserUseCase(userRepo, profileRepo, logger)
+	userUseCase := biz.NewUserUseCase(userRepo, profileRepo, logger, jwt)
 	realWorldService := service.NewRealWorldService(userUseCase)
-	httpServer := server.NewHTTPServer(confServer, realWorldService, logger)
+	httpServer := server.NewHTTPServer(confServer, jwt, realWorldService, logger)
 	grpcServer := server.NewGRPCServer(confServer, realWorldService, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
