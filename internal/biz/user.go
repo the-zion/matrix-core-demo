@@ -4,8 +4,8 @@ import (
 	"context"
 	"cube-core/internal/conf"
 	"cube-core/internal/pkg/middleware/auth"
-	"errors"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -46,6 +46,7 @@ func verifyPassword(hashed, input string) bool {
 type UserRepo interface {
 	CreateUser(ctx context.Context, user *User) error
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetUserByUsername(ctx context.Context, username string) (*User, error)
 }
 
 type ProfileRepo interface {
@@ -83,12 +84,15 @@ func (uc *UserUseCase) Register(ctx context.Context, username, email, password s
 }
 
 func (uc *UserUseCase) Login(ctx context.Context, email, password string) (*UserLogin, error) {
+	if len(email) == 0 {
+		return nil, errors.New(422, "email", "cannot be empty")
+	}
 	u, err := uc.ur.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
 	if !verifyPassword(u.PasswordHash, password) {
-		return nil, errors.New("login failed")
+		return nil, errors.Unauthorized("user", "login failed")
 	}
 	return &UserLogin{
 		Email:    u.Email,
