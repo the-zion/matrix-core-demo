@@ -1,8 +1,8 @@
 package errors
 
 import (
-	"errors"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/errors"
 )
 
 func NewHTTPError(code int, field string, detail string) *HTTPError {
@@ -29,6 +29,9 @@ func FromError(err error) *HTTPError {
 	}
 	if se := new(HTTPError); errors.As(err, &se) {
 		return se
+	}
+	if se := new(errors.Error); errors.As(err, &se) {
+		return NewHTTPError(int(se.Code), se.Reason, se.Message)
 	}
 	return &HTTPError{}
 }
